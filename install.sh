@@ -13,7 +13,7 @@ function install_nginx {
 }
 
 function install_benchmark_tools {
-    sudo apt-get update -y && sudo apt-get install -y smem jq iftop ifstat ethtool
+    sudo apt-get update -y && sudo apt-get install -y smem jq iftop ifstat ethtool netcat
 }
 
 function setup_loadgen {

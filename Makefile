@@ -11,6 +11,9 @@ include setup/cloudlab-tools/cloudlab_tools.mk
 # Cloudlab parameters
 LOAD_GEN_NODE=NODE_0
 SERVER_NODE=NODE_1
+REMOTE_DIR=~/src
+REMOTE_SUBDIR=$(shell basename ${CURDIR})
+PROJ_ROOT_DIR="${REMOTE_DIR}/${REMOTE_SUBDIR}"
 
 
 sync-code-to-nodes:
@@ -43,11 +46,21 @@ copy-all-exp-from-loadgen:
 	$(MAKE) cl-scp-from-host NODE=${LOAD_GEN_NODE} SCP_SRC=${REMOTE_DIR}/exp-load-test/experiments SCP_DEST=${CURDIR} && \
 	echo "All experiments copied from the loadgen"
 
+copy-exp-data:
+	@echo "Copying experiment data..."
+	$(MAKE) cl-scp-from-host NODE=${SERVER_NODE} SCP_SRC=${REMOTE_DIR}/exp-load-test/experiments/${EXP_NAME} SCP_DEST=${CURDIR}/experiments && \
+	echo "Experiment data copied"
 
-generate-exp-config:
+gen-exp-config:
+	@echo "Generating experiment configuration..." && \
+	./scripts/exp.sh create_exp_context ${EXP_NAME} ${EXP_DIR} ${CURDIR} && \
+	echo "Experiment configuration generated"
+
+
+configure-server: gen-exp-config
 	@echo "Generating experiment configuration..." && \
 	mkdir -p ${EXP_DIR} && \
 	jq -r '.[] | select(.name == "${EXP_NAME}") | .config.server | to_entries | .[] | "\(.key)=\(.value)"' experiments.json > ${EXP_DIR}/server.env && \
 	cd ${CURDIR}/server && \
 	$(MAKE) configure-server EXP_DIR=${EXP_DIR} && \
-	echo "Experiment configuration generated"
+	echo "Server configured"

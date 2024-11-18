@@ -7,12 +7,14 @@ trap 'last_command=$BASH_COMMAND; signal_received="INT"; trap - INT; cleanup; ki
 trap 'last_command=$BASH_COMMAND; signal_received="TERM"; trap - TERM; cleanup; kill -TERM $$' TERM
 trap 'last_command=$BASH_COMMAND; signal_received="ERR"; cleanup; exit 1' ERR
 
+
+exp_dir="${EXPERIMENT_DIR}"
+
 # create files to store the metrics of the experiment
 CPU_F=$(mktemp)
 MEM_F=$(mktemp)
 LOG_F=$(mktemp)
-OUT_F="metrics.csv"
-
+OUT_F="${exp_dir}/results.csv"
 
 function cleanup {
     echo "Cleaning up..."
@@ -88,7 +90,7 @@ while true; do
     trap - TERM
     trap - ERR
 
-    wait "${pids[@]}" && echo "Metrics collected successfully"
+    wait "${pids[@]}"
     waitstatus=$?
     if [ $waitstatus -ne 0 ]; then
         echo "Error collecting metrics"

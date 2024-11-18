@@ -21,6 +21,7 @@ error_log=$(mktemp)
 
 function cleanup {
   exit_status=$?
+  echo "BENCHMARKING_END" | nc ${url_without_protocol} 30000
   echo "Received signal: $signal_received"
   echo "Last command: $last_command"
   echo "Exit status: $exit_status"
@@ -78,7 +79,7 @@ echo "using device $device with max bandwidth $max_bandwidth_kbps KB/s"
 # Run the collection processes in parallel to avoid blocking.
 # For details see https://stackoverflow.com/a/68316571
 
-k6 "$@" -e URL="$url" >$out_file 2>&1 &
+k6 run "$@" -e URL="$url" >$out_file 2>&1 &
 pid="$!"
 
 echo "pid is $pid"
@@ -117,11 +118,25 @@ while true; do
     } &
     pids+=($!)
 
+    { 
+        exec >"$vusf"; { 
+            curl -fsSL http://localhost:6565/v1/metrics/vus 2>/dev/null || echo '{}'
+        } | jq '.data.attributes.sample.value // 0'; 
+    } &
+    pids+=($!)
+  
+    { 
+        exec >"$rpsf"; { 
+            curl -fsSL http://localhost:6565/v1/metrics/http_reqs 2>/dev/null || echo '{}'
+        } | jq '.data.attributes.sample.rate // 0'; 
+    } &
+    pids+=($!)
+
     trap - EXIT
     trap - INT
     trap - TERM
     trap - ERR
-    wait "${pids[@]}" && echo "All background processes completed successfully"
+    wait "${pids[@]}" 
     waitstatus=$?
     if [ $waitstatus -ne 0 ]; then
         echo "Error: One or more background processes failed with exit status $waitstatus"
