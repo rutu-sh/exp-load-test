@@ -1,0 +1,17 @@
+[
+    {
+        "name": "exp-1",
+        "description": "This is the first experiment.",
+        "config": {
+            "loadgen": {
+                "runcfg": "./configs/k6/default/script.js"
+            },
+            "server": {
+                "WORKER_CONNECTIONS": 200
+            }
+        },
+        "tags": [
+            "variable worker connections"
+        ]
+    }
+]
