@@ -2,24 +2,25 @@
 
 set -eEuo pipefail
 
+function cleanup {
+    echo "Cleaning up..."
+    rm -f $CPU_F $MEM_F 
+}
+
 trap 'last_command=$BASH_COMMAND; signal_received="EXIT"; cleanup; exit 0' EXIT
 trap 'last_command=$BASH_COMMAND; signal_received="INT"; trap - INT; cleanup; kill -INT $$' INT
 trap 'last_command=$BASH_COMMAND; signal_received="TERM"; trap - TERM; cleanup; kill -TERM $$' TERM
 trap 'last_command=$BASH_COMMAND; signal_received="ERR"; cleanup; exit 1' ERR
 
 
-exp_dir="${EXPERIMENT_DIR}"
+exp_dir="${EXPERIMENT_DIR}/metrics/server"
+mkdir -p "${exp_dir}"
 
 # create files to store the metrics of the experiment
 CPU_F=$(mktemp)
 MEM_F=$(mktemp)
 LOG_F=$(mktemp)
 OUT_F="${exp_dir}/results.csv"
-
-function cleanup {
-    echo "Cleaning up..."
-    rm -f $CPU_F $MEM_F 
-}
 
 
 TOOL_NAME=${TOOL_NAME:-"nginx"}

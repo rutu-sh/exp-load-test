@@ -28,8 +28,7 @@ function cleanup {
   rm -f "$cpuf" "$memf" "$bandwidthf" "$sockf" "$vusf" "$rpsf"
 }
 
-rm -f results.csv
-touch results.csv
+
 
 # Redirect all stdout to both the console and the error_log file
 exec > >(tee -a "$error_log") 2>&1
@@ -60,8 +59,13 @@ fi
 tool=${TOOL}
 
 exp_dir="${EXPERIMENT_DIR}"
+
+mkdir -p "$exp_dir"
 results_file="${exp_dir}/results.csv"
 out_file="${exp_dir}/out.txt"
+
+rm -f "$results_file" "$out_file"
+touch "$results_file" "$out_file"
 
 echo "error log: $error_log"
 
@@ -89,7 +93,6 @@ while true; do
     # Check if the process is still running
     if ! ps -p "$pid" > /dev/null; then
         echo "Process $pid has terminated. Exiting loop."
-        cleanup
         exit 0
     fi
   
@@ -141,8 +144,6 @@ while true; do
     if [ $waitstatus -ne 0 ]; then
         echo "Error: One or more background processes failed with exit status $waitstatus"
         cat "$error_log"
-
-        cleanup
         exit 1
     fi
     trap 'last_command=$BASH_COMMAND; signal_received="ERR"; cleanup; exit 1' ERR
