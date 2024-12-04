@@ -1,13 +1,13 @@
 {
-  "name": "exp-2",
-  "description": "This is the second experiment. With 200 worker connections.",
+  "name": "exp-3",
+  "description": "This is the third experiment. With 200 worker connections.",
   "config": {
     "loadgen": {
       "runcfg": "script.js",
       "parameters": []
     },
     "server": {
-      "WORKER_CONNECTIONS": 200
+      "WORKER_CONNECTIONS": 400
     }
   },
   "tags": [

@@ -24,4 +24,13 @@ function create_exp_context {
 	jq -r '.config.loadgen' ${exp_config}/experiment.json > ${loadgen_config}/loadgen.json 
 }
 
+function process_exp {
+    local venv=$1
+    local process_file=$2
+    local exp_dir=$3
+
+    source ${venv}/bin/activate
+    python3 ${process_file} --exp-dir ${exp_dir}
+}
+
 "$@"

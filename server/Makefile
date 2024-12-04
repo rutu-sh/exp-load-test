@@ -22,6 +22,6 @@ configure-server:
 
 benchmark-server:
 	@echo "Benchmarking the server..." 
-	nohup ./netcat.sh 2>&1 /dev/null &
+	nohup ./netcat.sh nc_listen > /dev/null 2>&1 & 
 	EXPERIMENT_DIR=${EXP_DIR} nohup ./benchmark.sh ${PARAMETERS} > /dev/null 2>&1 &
-	echo "Benchmarking started"
+	echo "Server benchmarking started"

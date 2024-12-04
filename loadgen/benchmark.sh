@@ -5,10 +5,10 @@
 # - iproute2 (for ss command)
 set -eEuo pipefail
 
-trap 'last_command=$BASH_COMMAND; signal_received="EXIT"; cleanup; exit 0' EXIT
-trap 'last_command=$BASH_COMMAND; signal_received="INT"; trap - INT; cleanup; kill -INT $$' INT
-trap 'last_command=$BASH_COMMAND; signal_received="TERM"; trap - TERM; cleanup; kill -TERM $$' TERM
-trap 'last_command=$BASH_COMMAND; signal_received="ERR"; cleanup; exit 1' ERR
+trap 'last_command=$BASH_COMMAND;signal_received="EXIT";cleanup;exit 0' EXIT
+trap 'last_command=$BASH_COMMAND;signal_received="INT";trap - INT; cleanup;kill -INT $$' INT
+trap 'last_command=$BASH_COMMAND;signal_received="TERM";trap - TERM;cleanup;kill -TERM $$' TERM
+trap 'last_command=$BASH_COMMAND;signal_received="ERR";cleanup;exit 1' ERR
 
 # Create temp files to store the output of each collection command.
 cpuf=$(mktemp)
@@ -21,11 +21,14 @@ error_log=$(mktemp)
 
 function cleanup {
   exit_status=$?
+  echo "Cleaning up..."
   echo "BENCHMARKING_END" | nc ${url_without_protocol} 30000
-  echo "Received signal: $signal_received"
-  echo "Last command: $last_command"
-  echo "Exit status: $exit_status"
+  echo "Received signal: $signal_received" || true
+  echo "Last command: $last_command" || true
+  echo "Exit status: $exit_status" || true``
   rm -f "$cpuf" "$memf" "$bandwidthf" "$sockf" "$vusf" "$rpsf"
+  echo "Error log:" && cat "$error_log"
+  cp $error_log ${exp_dir}/error.log
 }
 
 
@@ -83,7 +86,7 @@ echo "using device $device with max bandwidth $max_bandwidth_kbps KB/s"
 # Run the collection processes in parallel to avoid blocking.
 # For details see https://stackoverflow.com/a/68316571
 
-k6 run "$@" -e URL="$url" >$out_file 2>&1 &
+k6 run "$@" -e URL="$url" -e EXP_DIR="${exp_dir}" >$out_file 2>&1 &
 pid="$!"
 
 echo "pid is $pid"

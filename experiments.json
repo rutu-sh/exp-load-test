@@ -30,5 +30,21 @@
         "tags": [
             "variable worker connections"
         ]
+    },
+    {
+        "name": "exp-3",
+        "description": "This is the third experiment. With 200 worker connections.",
+        "config": {
+            "loadgen": {
+                "runcfg": "configs/k6/default/script.js",
+                "parameters": []
+            },
+            "server": {
+                "WORKER_CONNECTIONS": 400
+            }
+        },
+        "tags": [
+            "variable worker connections"
+        ]
     }
 ]

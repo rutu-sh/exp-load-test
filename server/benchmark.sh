@@ -7,10 +7,10 @@ function cleanup {
     rm -f $CPU_F $MEM_F 
 }
 
-trap 'last_command=$BASH_COMMAND; signal_received="EXIT"; cleanup; exit 0' EXIT
+trap 'last_command=$BASH_COMMAND; signal_received="EXIT"; cleanup;' EXIT
 trap 'last_command=$BASH_COMMAND; signal_received="INT"; trap - INT; cleanup; kill -INT $$' INT
 trap 'last_command=$BASH_COMMAND; signal_received="TERM"; trap - TERM; cleanup; kill -TERM $$' TERM
-trap 'last_command=$BASH_COMMAND; signal_received="ERR"; cleanup; exit 1' ERR
+trap 'last_command=$BASH_COMMAND; signal_received="ERR"; cleanup; exit 0' ERR
 
 
 exp_dir="${EXPERIMENT_DIR}/metrics/server"
@@ -21,6 +21,10 @@ CPU_F=$(mktemp)
 MEM_F=$(mktemp)
 LOG_F=$(mktemp)
 OUT_F="${exp_dir}/results.csv"
+
+touch ${exp_dir}/temp.txt
+
+rm -f ${OUT_F}
 
 
 TOOL_NAME=${TOOL_NAME:-"nginx"}
